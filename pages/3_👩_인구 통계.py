@@ -7,10 +7,9 @@ if 'recommendation' not in st.session_state:
     st.session_state['recommendation'] = []
 
 st.title('인구 통계')
-'국가통계포털(kosis.kr)의 인구 통계를 선택적으로 제공합니다.'
+st.markdown('국가통계포털([kosis.kr](kosis.kr))의 인구 통계를 선택적으로 제공합니다.')
 '국가통계포털에서 실시간으로 데이터를 가져오는 서비스가 **아닙니다**.'
 '원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎**정보**에 의견을 남겨주세요.'
-st.error('아직 테스트 중이니, 오작동할 수 있습니다.')
 ''
 ''
 ''
@@ -22,13 +21,20 @@ selection = st.multiselect('비교할 데이터를 선택하세요.', data_list,
 
 if selection:
     ''
-    chart_selection = st.radio('차트 선택:', ('선 차트', '영역 차트', '바 차트'))
     data = []
     for i in selection:
         data.append(pd.read_csv(f'data/{i}.csv', encoding = 'CP949', index_col = 0))
     dataset = pd.concat(data, axis = 1)
     dataset = dataset.sort_index()
     dataset = dataset.sort_index(axis = 1)
+    co1, co2 = st.columns(2)
+    with co1:
+        chart_selection = st.radio('차트 선택:', ('선 차트', '영역 차트', '바 차트'))
+    with co2:
+        year = st.slider('조회를 원하는 연도 범위를 선택하세요.', 1925, 2020, ())
+    dataset = dataset.reset_index()
+    dataset = dataset.loc[(year[0] <= dataset['시점']) & (dataset['시점'] <= year[1])]
+    dataset = dataset.set_index('시점')
     if chart_selection == '선 차트':
         st.line_chart(dataset)
     elif chart_selection == '영역 차트':
@@ -39,4 +45,4 @@ if selection:
     st.write(dataset)
     st.download_button(label = '📄 데이터 다운로드', data = dataset.to_csv().encode('CP949'),
         file_name = 'data.csv', mime = 'text/csv',
-        help = 'CSV 파일을 다운로드합니다. CSV 파일이 뭔지 모르겠다고요? 걱정하지 마세요! 엑셀로 열립니다.')
+        help = 'CSV 파일을 다운로드합니다. 그게 뭐냐고요? 걱정하지 마세요! 엑셀로 열립니다.')
