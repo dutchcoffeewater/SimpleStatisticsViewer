@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title = '정보 - 통계 간편 조회 서비스', page_icon = '😎')
 
-st.title('정보')
+st.title('😎 정보')
 ''
 ''
 ''
