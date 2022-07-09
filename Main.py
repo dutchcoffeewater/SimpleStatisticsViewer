@@ -33,7 +33,7 @@ with co1:
         st.success('이제 왼쪽 사이드바를 열고 👩 인구 통계를 선택하세요.')
 
 with co2:
-    st.subheader('📊 물가 통계')
+    st.subheader('📈 물가 통계')
     if st.button('소비자물가지수'):
         st.session_state['recommendation_money'] = ['소비자물가지수']
-        st.success('이제 왼쪽 사이드바를 열고 📊 물가 통계를 선택하세요.')
+        st.success('이제 왼쪽 사이드바를 열고 📈 물가 통계를 선택하세요.')
