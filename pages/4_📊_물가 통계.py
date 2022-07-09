@@ -45,7 +45,7 @@ if selection:
 
     if '소비자물가지수' in selection:
         if '소비자물가지수' in st.session_state['recommendation_money']:
-            st.success('아래의 가격 계산기도 확인해보세요.')
+                st.success('아래의 가격 계산기도 확인해보세요.')
         with st.expander('소비자물가지수 가격 계산기'):
             if min(year) < 1965:
                 if max(year) < 1965:
