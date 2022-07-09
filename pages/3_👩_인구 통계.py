@@ -25,7 +25,7 @@ if selection:
     chart_selection = st.radio('차트 선택:', ('선 차트', '영역 차트', '바 차트'))
     data = []
     for i in selection:
-        data.append(pd.read_csv(f'data\{i}.csv', encoding = 'CP949', index_col = 0))
+        data.append(pd.read_csv(f'data/{i}.csv', encoding = 'CP949', index_col = 0))
     dataset = pd.concat(data, axis = 1)
     dataset = dataset.sort_index()
     dataset = dataset.sort_index(axis = 1)
