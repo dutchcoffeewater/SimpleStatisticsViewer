@@ -12,10 +12,28 @@ with st.form('Requests',True):
     request_email = st.text_input('답변을 이메일로 받으시려면, 이메일을 입력해주세요.')
     if st.form_submit_button('제출'):
         if request:
-            st.error('아직 구현되지 않은 기능입니다.')
-            with open('requests.txt', 'a', encoding = 'UTF-8') as f:
-                f.write('요청:'+request+'\n')
-                f.write('이메일:'+request_email+'\n\n')
+            try:
+                import smtplib
+                from email.message import EmailMessage
+
+                smtp_naver = smtplib.SMTP('smtp.naver.com', 587)
+                smtp_naver.ehlo()
+                smtp_naver.starttls()
+                smtp_naver.login(request_sender, request_sender_pw)
+                send_request = EmailMessage()
+                if request_email:
+                    send_request['Subject'] = request_email+'의 새로운 요청'
+                else:
+                    send_request['Subject'] = 'Anonymous의 새로운 요청'
+                send_request.set_content(request)
+                send_request['From'] = request_sender
+                send_request['To'] = 'solo4emergency@gmail.com'
+                smtp_naver.send_message(send_request)
+
+                st.success('접수되었습니다.')
+            except:
+                st.warning('이런! 무언가 문제가 있었습니다. 다시 시도해 주세요.')
+
         else:
             st.error('요청사항을 입력해주세요.')
 
