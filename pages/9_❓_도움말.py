@@ -68,3 +68,12 @@ with st.form('소비자물가지수로 가격 비교하기'):
     if st.form_submit_button('시도해 보기'):
             st.session_state['recommendation_money'] = ['소비자물가지수']
             st.success('이제 왼쪽 사이드바를 열고 📈 물가 통계를 선택하세요. 그래프 아래의 **소비자물가지수 가격 계산기**를 클릭하세요.')
+''
+''
+''
+st.subheader('사이트 테마 변경하기')
+with st.form('사이트 테마 변경하기'):
+    st.image('assets/photos/사이트 테마 변경하기.png')
+    '우측 상단의 메뉴 버튼을 누르고 **Settings**를 선택하세요. 사이트를 더 넓게 보거나, 사이트의 테마를 조정할 수 있습니다.'
+    if st.form_submit_button('시도해 보기'):
+        st.warning('아직 지원하지 않는 기능입니다. 직접 해 보세요!')

@@ -9,9 +9,7 @@ if 'original_chart' not in st.session_state:
     st.session_state['original_chart'] = False
 
 st.title('👩 인구 통계')
-st.markdown('국가통계포털([kosis.kr](https://kosis.kr))의 인구 통계를 선택적으로 제공합니다.')
-'국가통계포털에서 실시간으로 데이터를 가져오는 서비스가 **아닙니다**.'
-'원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎 **정보**에 의견을 남겨주세요.'
+st.markdown('국가통계포털([kosis.kr](https://kosis.kr))의 인구 통계를 선택적으로 제공합니다.  \n국가통계포털에서 실시간으로 데이터를 가져오는 서비스가 **아닙니다**.  \n원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎 **정보**에 의견을 남겨주세요.')
 ''
 ''
 ''
