@@ -30,6 +30,7 @@ def run_query(query):
 sheet_url = st.secrets["private_gsheets_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
 st.write(rows)
+st.write(type(rows))
 
 for row in rows:
     st.write(row)
@@ -46,6 +47,7 @@ with st.form('login', True):
     login_pw = st.text_input('비밀번호', type = 'password')
     if st.form_submit_button('로그인'):
         if login_id and login_pw:
+            for 
             st.warning('아직 구현되지 않은 기능입니다.')
         else:
             st.error('아이디와 비밀번호를 모두 입력해 주세요.')
