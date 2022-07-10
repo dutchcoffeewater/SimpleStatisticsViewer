@@ -4,4 +4,4 @@ Streamlit 맛보기용으로 제작한 파일입니다. 항상 통계청의 통�
 
 관심 있으시면 둘러보세요.
 
-링크: https://dutchcoffeewater-simplestatisticsviewer-main-jubc77.streamlitapp.com/
+링크: https://dutchcoffeewater-simplestatisticsviewer---9rruj3.streamlitapp.com/
