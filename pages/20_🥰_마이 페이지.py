@@ -33,11 +33,11 @@ sheet_url = st.secrets["private_gsheets_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
 
 def add_row_to_gsheet(rows, new_user_data) -> None:
-    rows.values().append(
+    rows.append(
         spreadsheetId = sheet_url,
         range = f"User!A:D",
         body=dict(values = new_user_data),
-        valueInputOption="USER_ENTERED",
+        valueInputOption = "USER_ENTERED",
     ).execute()
 
 
