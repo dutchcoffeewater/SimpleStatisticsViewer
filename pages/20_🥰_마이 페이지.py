@@ -1,6 +1,11 @@
 import streamlit as st
 from google.oauth2 import service_account
 from gsheetsdb import connect
+import google_auth_httplib2
+import httplib2
+from googleapiclient.http import HttpRequest
+from googleapiclient.discovery import build
+import pandas as pd
 
 st.set_page_config(page_title = '마이 페이지 - 통계 간편 조회 서비스', page_icon = '🥰')
 
@@ -11,18 +16,70 @@ if 'sign_in' not in st.session_state:
 
 
 
-# Create a connection object.
-credentials = service_account.Credentials.from_service_account_info(
-    st.secrets['gcp_service_account'],
-    scopes = [
-        'https://www.googleapis.com/auth/spreadsheets'
-    ],
-)
+SPREADSHEET_ID = "1nuS0sBSe32Ssre5moPTlHsB2_XeZ0HmZ1Uky47ATNvc"
+SHEET_NAME = "User"
+GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
+
+def connect_to_gsheet():
+    # Create a connection object.
+    global credentials
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets['gcp_service_account'],
+        scopes = ["https://www.googleapis.com/auth/spreadsheets"],
+    )
+
+    # Create a new Http() object for every request
+    def build_request(http, *args, **kwargs):
+        new_http = google_auth_httplib2.AuthorizedHttp(
+            credentials, http = httplib2.Http()
+        )
+        return HttpRequest(new_http, *args, **kwargs)
+
+    authorized_http = google_auth_httplib2.AuthorizedHttp(
+        credentials, http = httplib2.Http()
+    )
+    service = build(
+        "sheets",
+        "v4",
+        requestBuilder = build_request,
+        http = authorized_http,
+        cache_discovery = False
+    )
+    gsheet_connector = service.spreadsheets()
+    return gsheet_connector
+
+
+def get_data(gsheet_connector) -> pd.DataFrame:
+    values = (
+        gsheet_connector.values()
+        .get(
+            spreadsheetId = SPREADSHEET_ID,
+            range = f"{SHEET_NAME}!A:D",
+        )
+        .execute()
+    )
+
+    df = pd.DataFrame(values["values"])
+    df.columns = df.iloc[0]
+    df = df[1:]
+    return df
+
+
+def add_row_to_gsheet(gsheet_connector, row) -> None:
+    gsheet_connector.values().append(
+        spreadsheetId = SPREADSHEET_ID,
+        range = f"{SHEET_NAME}!A:D",
+        body = dict(values = row),
+        valueInputOption = "USER_ENTERED",
+    ).execute()
+
+
+
+gsheet_connector = connect_to_gsheet()
 
 conn = connect(credentials = credentials)
 
-# Perform SQL query on the Google Sheet.
-# Uses st.cache to only rerun when the query changes or after 10 min.
+# # Perform SQL query on the Google Sheet.
 @st.cache(ttl = 20)
 def run_query(query):
     rows = conn.execute(query, headers = 1)
@@ -31,14 +88,6 @@ def run_query(query):
 
 sheet_url = st.secrets["private_gsheets_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
-
-def add_row_to_gsheet(rows, new_user_data) -> None:
-    rows.append(
-        spreadsheetId = sheet_url,
-        range = f"User!A:D",
-        body=dict(values = new_user_data),
-        valueInputOption = "USER_ENTERED",
-    ).execute()
 
 
 
@@ -56,8 +105,10 @@ with st.form('login', True):
                 if row[1] == login_id and row[2] == login_pw:
                     f'환영합니다, {login_id}님.'
                     st.session_state['sign_in'] = row
+                    st.session_state['sign_in']
                     break
-            st.warning('아직 구현되지 않은 기능입니다.')
+            else:
+                st.error('일치하는 회원 정보를 찾을 수 없습니다.')
         else:
             st.error('아이디와 비밀번호를 모두 입력해 주세요.')
 ''
@@ -80,12 +131,13 @@ if st.session_state['sign_up_show']:
             elif '@' not in sign_up_email:
                 st.error('이메일을 다시 확인해 주세요.')
             else:
-                # try:
-                add_row_to_gsheet(
-                    rows,
-                    [[0, sign_up_id, sign_up_pw, sign_up_email]],
-                )
-                st.success("회원가입이 완료되었습니다.")
-                st.balloons()
-                # except:
-                # st.warning('이런! 무언가 문제가 있었습니다. 다시 시도해 주세요.')
+                try:
+                    add_row_to_gsheet(
+                        gsheet_connector,
+                        [[0, sign_up_id, sign_up_pw, sign_up_email]],
+                    )
+                    st.success("회원가입이 완료되었습니다.")
+                    st.balloons()
+                    st.session_state['sign_up_show'] = False
+                except:
+                    st.warning('이런! 무언가 문제가 있었습니다. 다시 시도해 주세요.')
