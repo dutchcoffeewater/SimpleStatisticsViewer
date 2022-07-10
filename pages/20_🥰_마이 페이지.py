@@ -47,7 +47,7 @@ with st.form('login', True):
                     f'환영합니다, {login_id}님.'
                     f'회원번호: {row[0]}'
                     f'이메일: {row[3]}'
-                break
+                    break
             st.warning('아직 구현되지 않은 기능입니다.')
         else:
             st.error('아이디와 비밀번호를 모두 입력해 주세요.')
