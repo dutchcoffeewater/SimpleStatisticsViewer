@@ -51,8 +51,8 @@ with st.form('login', True):
             for row in rows:
                 if row['아이디'] == login_id and row['비밀번호'] == login_pw:
                     f'환영합니다, {login_id}님.'
-                    f'회원번호: {row['회원번호']}'
-                    f'이메일: {row['이메일']}'
+                    f'회원번호: {row["회원번호"]}'
+                    f'이메일: {row["이메일"]}'
                 break
             st.warning('아직 구현되지 않은 기능입니다.')
         else:
