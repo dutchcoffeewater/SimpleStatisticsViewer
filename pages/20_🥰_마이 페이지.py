@@ -21,7 +21,7 @@ conn = connect(credentials = credentials)
 
 # Perform SQL query on the Google Sheet.
 # Uses st.cache to only rerun when the query changes or after 10 min.
-@st.cache(ttl = 600)
+@st.cache(ttl = 10)
 def run_query(query):
     rows = conn.execute(query, headers = 1)
     rows = rows.fetchall()
@@ -29,12 +29,6 @@ def run_query(query):
 
 sheet_url = st.secrets["private_gsheets_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
-st.write(rows)
-st.write(type(rows))
-
-for row in rows:
-    st.write(row)
-    st.write(type(row))
 
 
 
