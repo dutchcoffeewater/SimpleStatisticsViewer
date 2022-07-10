@@ -34,6 +34,7 @@ st.write(type(rows))
 
 for row in rows:
     st.write(row)
+    st.write(type(row))
 
 
 
