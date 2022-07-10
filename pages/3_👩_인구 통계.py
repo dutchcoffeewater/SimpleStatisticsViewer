@@ -11,7 +11,7 @@ if 'original_chart' not in st.session_state:
 st.title('👩 인구 통계')
 st.markdown('국가통계포털([kosis.kr](https://kosis.kr))의 인구 통계를 선택적으로 제공합니다.')
 '국가통계포털에서 실시간으로 데이터를 가져오는 서비스가 **아닙니다**.'
-'원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎**정보**에 의견을 남겨주세요.'
+'원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎 **정보**에 의견을 남겨주세요.'
 ''
 ''
 ''
@@ -55,7 +55,7 @@ if selection:
             st.area_chart(dataset2)
         elif chart_selection == '바 차트':
             if year[0] <= 2010 and 2016 <= year[1]:
-                st.warning('인구 통계의 경우 2015년부터 매년 통계를 내기 때문에 이를 전후로 X축 스케일이 다릅니다. 해석에 주의해주세요.')
+                st.warning('인구 범주의 경우 2015년부터 매년 통계를 내기 때문에 이를 전후로 X축 스케일이 다릅니다. 해석에 주의해주세요.')
             st.bar_chart(dataset2)
         
         st.warning('현재 표시되는 그래프와 데이터는 축약된 형태입니다!')
@@ -97,14 +97,14 @@ if selection:
         elif chart_selection == '영역 차트':
             st.area_chart(dataset)
         elif chart_selection == '바 차트':
-            if year[0] <= 2010 and 2016 <= year[1]:
-                st.warning('인구 통계의 경우 2015년부터 매년 통계를 내기 때문에 이를 전후로 X축 스케일이 다릅니다. 해석에 주의해주세요.')
+            if year[0] <= 2010 and 2016 <= year[1] and '인구 ' in classification:
+                st.warning('인구 범주의 경우 2015년부터 매년 통계를 내기 때문에 이를 전후로 X축 스케일이 다릅니다. 해석에 주의해주세요.')
             st.bar_chart(dataset)
         
         if '인구 ' in classification and '취업자' in classification:
             with st.expander('그래프가 제대로 표시되지 않나요?'):
-                '인구 범주는 5년 단위로 작성된 반면 취업자 범주는 1년 단위로 작성되었기 때문에,'
-                '현재 인구 범주와 취업자 범주를 함께 조회하면 인구 범주가 제대로 표시되지 않습니다.'
+                st.write('인구 범주는 5년 단위로 작성된 반면 취업자 범주는 1년 단위로 작성되었기 때문에, '
+                + '현재 인구 범주와 취업자 범주를 함께 조회하면 인구 범주가 제대로 표시되지 않습니다.')
                 '축약된 형태로 로드하면 이 문제를 해결할 수 있지만, 일부 데이터가 제외됩니다.'
                 if st.button('축약된 형태로 로드하기'):
                     st.session_state['original_chart'] = False
