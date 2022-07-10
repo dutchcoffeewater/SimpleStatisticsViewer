@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 
 st.set_page_config(page_title = '통계 간편 조회 서비스', page_icon = '📊')
 
@@ -35,8 +36,19 @@ with co1:
         st.session_state['recommendation_population'] = ['인구 - 총 인구', '취업자 - 총 취업자']
         st.success('이제 왼쪽 사이드바를 열고 👩 인구 통계를 선택하세요.')
 
+    ''
+    os.chdir('data\인구 통계')
+    st.metric('현재 조회 가능한 인구 통계', str(len(os.listdir()))+'개')
+
 with co2:
     st.subheader('📈 물가 통계')
     if st.button('소비자물가지수'):
         st.session_state['recommendation_money'] = ['소비자물가지수']
         st.success('이제 왼쪽 사이드바를 열고 📈 물가 통계를 선택하세요.')
+    
+    ''
+    os.chdir('../')
+    os.chdir('물가 통계')
+    st.metric('현재 조회 가능한 물가 통계', str(len(os.listdir()))+'개')
+
+    os.chdir('../../')
