@@ -6,6 +6,8 @@ st.set_page_config(page_title = '마이 페이지 - 통계 간편 조회 서비�
 
 if 'sign_up_show' not in st.session_state:
     st.session_state['sign_up_show'] = False
+if 'sign_in' not in st.session_state:
+    st.session_state['sign_in'] = []
 
 
 
@@ -21,7 +23,7 @@ conn = connect(credentials = credentials)
 
 # Perform SQL query on the Google Sheet.
 # Uses st.cache to only rerun when the query changes or after 10 min.
-@st.cache(ttl = 10)
+@st.cache(ttl = 20)
 def run_query(query):
     rows = conn.execute(query, headers = 1)
     rows = rows.fetchall()
@@ -29,6 +31,14 @@ def run_query(query):
 
 sheet_url = st.secrets["private_gsheets_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
+
+def add_row_to_gsheet(rows, new_user_data) -> None:
+    rows.values().append(
+        spreadsheetId = sheet_url,
+        range = f"User!A:D",
+        body=dict(values = new_user_data),
+        valueInputOption="USER_ENTERED",
+    ).execute()
 
 
 
@@ -45,8 +55,7 @@ with st.form('login', True):
             for row in rows:
                 if row[1] == login_id and row[2] == login_pw:
                     f'환영합니다, {login_id}님.'
-                    f'회원번호: {row[0]}'
-                    f'이메일: {row[3]}'
+                    st.session_state['sign_in'] = row
                     break
             st.warning('아직 구현되지 않은 기능입니다.')
         else:
@@ -71,4 +80,12 @@ if st.session_state['sign_up_show']:
             elif '@' not in sign_up_email:
                 st.error('이메일을 다시 확인해 주세요.')
             else:
-                st.warning('아직 구현되지 않은 기능입니다.')
+                # try:
+                add_row_to_gsheet(
+                    rows,
+                    [[0, sign_up_id, sign_up_pw, sign_up_email]],
+                )
+                st.success("회원가입이 완료되었습니다.")
+                st.balloons()
+                # except:
+                # st.warning('이런! 무언가 문제가 있었습니다. 다시 시도해 주세요.')
