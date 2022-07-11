@@ -91,6 +91,10 @@ if st.session_state['sign_in']:
     st.subheader(f'환영합니다, {st.session_state["sign_in"][1]}님.')
     '계정 정보:'
     st.session_state['sign_in']
+    ''
+    if st.button('로그아웃'):
+        st.session_state['sign_in'] = []
+        st.experimental_rerun()
 
 else:
     # 로그인 폼
