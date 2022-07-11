@@ -16,10 +16,11 @@ if 'sign_in' not in st.session_state:
 
 
 
-SPREADSHEET_ID = "1nuS0sBSe32Ssre5moPTlHsB2_XeZ0HmZ1Uky47ATNvc"
+SPREADSHEET_ID = st.secrets['spreadsheet_id']
 SHEET_NAME = "User"
 GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
 
+# @st.cache(allow_output_mutation = True)
 def connect_to_gsheet():
     # Create a connection object.
     global credentials
@@ -48,7 +49,7 @@ def connect_to_gsheet():
     gsheet_connector = service.spreadsheets()
     return gsheet_connector
 
-
+@st.cache(ttl = 10)
 def get_data(gsheet_connector) -> pd.DataFrame:
     values = (
         gsheet_connector.values()
@@ -73,12 +74,6 @@ def add_row_to_gsheet(gsheet_connector, row) -> None:
         valueInputOption = "USER_ENTERED",
     ).execute()
 
-
-
-gsheet_connector = connect_to_gsheet()
-
-conn = connect(credentials = credentials)
-
 # # Perform SQL query on the Google Sheet.
 @st.cache(ttl = 20)
 def run_query(query):
@@ -86,58 +81,84 @@ def run_query(query):
     rows = rows.fetchall()
     return rows
 
-sheet_url = st.secrets["private_gsheets_url"]
-rows = run_query(f'SELECT * FROM "{sheet_url}"')
-
 
 
 st.title('🥰 마이 페이지')
 ''
 ''
 ''
-st.subheader('로그인')
-with st.form('login', True):
-    login_id = st.text_input('아이디')
-    login_pw = st.text_input('비밀번호', type = 'password')
-    if st.form_submit_button('로그인'):
-        if login_id and login_pw:
-            for row in rows:
-                if row[1] == login_id and row[2] == login_pw:
-                    f'환영합니다, {login_id}님.'
-                    st.session_state['sign_in'] = row
-                    st.session_state['sign_in']
-                    break
-            else:
-                st.error('일치하는 회원 정보를 찾을 수 없습니다.')
-        else:
-            st.error('아이디와 비밀번호를 모두 입력해 주세요.')
-''
-'회원이 되시면 통계 즐겨찾기 등 다양한 기능을 이용하실 수 있습니다.'
-if st.button('회원가입'):
-    if st.session_state['sign_up_show']:
-        st.session_state['sign_up_show'] = False
-    else:
-        st.session_state['sign_up_show'] = True
+if st.session_state['sign_in']:
+    st.subheader(f'환영합니다, {st.session_state["sign_in"][1]}님.')
+    '계정 정보:'
+    st.session_state['sign_in']
 
-if st.session_state['sign_up_show']:
-    with st.form('sign_up', True):
-        sign_up_id = st.text_input('아이디')
-        sign_up_pw = st.text_input('비밀번호', type = 'password')
-        sign_up_pw_check = st.text_input('비밀번호 확인', type = 'password')
-        sign_up_email = st.text_input('이메일')
-        if st.form_submit_button('회원가입'):
-            if sign_up_pw != sign_up_pw_check:
-                st.error('비밀번호가 틀립니다. 다시 확인해주세요.')
-            elif '@' not in sign_up_email:
-                st.error('이메일을 다시 확인해 주세요.')
-            else:
+else:
+    # 로그인 폼
+    st.subheader('로그인')
+    with st.form('login', True):
+        login_id = st.text_input('아이디')
+        login_pw = st.text_input('비밀번호', type = 'password')
+        if st.form_submit_button('로그인'):
+            if login_id and login_pw:
+                # 로그인 시작
                 try:
-                    add_row_to_gsheet(
-                        gsheet_connector,
-                        [[0, sign_up_id, sign_up_pw, sign_up_email]],
-                    )
-                    st.success("회원가입이 완료되었습니다.")
-                    st.balloons()
-                    st.session_state['sign_up_show'] = False
+                    gsheet_connector = connect_to_gsheet()
+                    conn = connect(credentials = credentials)
+                    sheet_url = GSHEET_URL
+                    rows = run_query(f'SELECT * FROM "{sheet_url}"')
                 except:
-                    st.warning('이런! 무언가 문제가 있었습니다. 다시 시도해 주세요.')
+                    st.warning('이런! 무언가 문제가 있었습니다. 잠시 후 다시 시도해 주세요.')
+                finally:
+                    for row in rows:
+                        if row[1] == login_id:
+                            if row[2] == login_pw:
+                                st.session_state['sign_in'] = row
+                                st.experimental_rerun()
+                            else:
+                                st.error('일치하는 회원 정보를 찾을 수 없습니다.')
+                            break
+                    else:
+                        st.error('일치하는 회원 정보를 찾을 수 없습니다.')
+            else:
+                st.error('아이디와 비밀번호를 모두 입력해 주세요.')
+
+    # 회원가입
+    ''
+    '회원이 되시면 통계 즐겨찾기 등 다양한 기능을 이용하실 수 있습니다.'
+    if st.button('회원가입'):
+        if st.session_state['sign_up_show']:
+            st.session_state['sign_up_show'] = False
+        else:
+            st.session_state['sign_up_show'] = True
+
+    if st.session_state['sign_up_show']:
+        with st.form('sign_up', True):
+            sign_up_id = st.text_input('아이디')
+            sign_up_pw = st.text_input('비밀번호', type = 'password')
+            sign_up_pw_check = st.text_input('비밀번호 확인', type = 'password')
+            sign_up_email = st.text_input('이메일')
+            if st.form_submit_button('회원가입'):
+                if sign_up_pw != sign_up_pw_check:
+                    st.error('비밀번호가 틀립니다. 다시 확인해주세요.')
+                elif '@' not in sign_up_email:
+                    st.error('이메일을 다시 확인해 주세요.')
+                else:
+                    try:
+                        gsheet_connector = connect_to_gsheet()
+                        conn = connect(credentials = credentials)
+                        sheet_url = GSHEET_URL
+                        rows = run_query(f'SELECT * FROM "{sheet_url}"')
+                        for row in rows:
+                            if row[1] == sign_up_id:
+                                st.warning('동일한 아이디가 이미 등록되어 있습니다. 다른 아이디를 사용해주세요.')
+                                break
+                        else:
+                            add_row_to_gsheet(
+                                gsheet_connector,
+                                [[0, sign_up_id, sign_up_pw, sign_up_email]],
+                            )
+                            st.success("회원가입이 완료되었습니다.")
+                            st.balloons()
+                            st.session_state['sign_up_show'] = False
+                    except:
+                        st.warning('이런! 무언가 문제가 있었습니다. 잠시 후 다시 시도해 주세요.')
