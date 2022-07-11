@@ -92,6 +92,8 @@ if st.session_state['sign_in']:
     '계정 정보:'
     st.session_state['sign_in']
     ''
+    '통계 즐겨찾기 기능은 현재 **준비 중**입니다. 이용에 불편을 드려 죄송합니다.'
+    ''
     if st.button('로그아웃'):
         st.session_state['sign_in'] = []
         st.experimental_rerun()
