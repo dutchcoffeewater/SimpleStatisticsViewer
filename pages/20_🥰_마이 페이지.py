@@ -1,6 +1,5 @@
 import streamlit as st
 from google.oauth2 import service_account
-from gsheetsdb import connect
 import google_auth_httplib2
 import httplib2
 from googleapiclient.http import HttpRequest
