@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 st.set_page_config(page_title = '인구 통계 - 통계 간편 조회 서비스', page_icon = '👩')
 
@@ -7,17 +8,22 @@ if 'recommendation_population' not in st.session_state:
     st.session_state['recommendation_population'] = []
 if 'original_chart' not in st.session_state:
     st.session_state['original_chart'] = False
+if 'sign_in' not in st.session_state:
+    st.session_state['sign_in'] = []
+
+
 
 st.title('👩 인구 통계')
 st.markdown('국가통계포털([kosis.kr](https://kosis.kr))의 인구 통계를 선택적으로 제공합니다.  \n국가통계포털에서 실시간으로 데이터를 가져오는 서비스가 **아닙니다**.  \n원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎 **정보**에 의견을 남겨주세요.')
 ''
 ''
 ''
-data_list = sorted(['인구 - 총 인구', '인구 - 서울특별시', '인구 - 부산광역시', '인구 - 대구광역시', '인구 - 인천광역시',
-    '인구 - 광주광역시', '인구 - 대전광역시', '인구 - 울산광역시', '인구 - 세종특별자치시', '인구 - 경기도',
-    '인구 - 강원도', '인구 - 충청북도', '인구 - 충청남도', '인구 - 전라북도', '인구 - 전라남도', '인구 - 경상북도',
-    '인구 - 경상남도', '인구 - 제주특별자치도', '취업자 - 총 취업자', '취업자 - 비임금근로자', '취업자 - 자영업자', '취업자 - 임금근로자',
-    '취업자 - 무급가족종사자'])
+os.chdir('data/인구 통계')
+raw_list = sorted(os.listdir())
+os.chdir('../../')
+data_list = []
+for i in raw_list:
+    data_list.append(i[:-4])
 selection = st.multiselect('조회할 데이터를 선택하세요.', data_list,
     default = st.session_state['recommendation_population'])
 

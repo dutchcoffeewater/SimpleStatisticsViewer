@@ -20,7 +20,6 @@ SPREADSHEET_ID = st.secrets['spreadsheet_id']
 SHEET_NAME = "User"
 GSHEET_URL = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}"
 
-# @st.cache(allow_output_mutation = True)
 def connect_to_gsheet():
     # Create a connection object.
     global credentials
@@ -53,14 +52,11 @@ def connect_to_gsheet():
 def get_data(gsheet_connector) -> pd.DataFrame:
     values = (
         gsheet_connector.values()
-        .get(
-            spreadsheetId = SPREADSHEET_ID,
-            range = f"{SHEET_NAME}!A:D",
-        )
+        .get(spreadsheetId = SPREADSHEET_ID, range = f'{SHEET_NAME}!A:E',)
         .execute()
     )
 
-    df = pd.DataFrame(values["values"])
+    df = pd.DataFrame(values['values'])
     df.columns = df.iloc[0]
     df = df[1:]
     return df
@@ -69,17 +65,10 @@ def get_data(gsheet_connector) -> pd.DataFrame:
 def add_row_to_gsheet(gsheet_connector, row) -> None:
     gsheet_connector.values().append(
         spreadsheetId = SPREADSHEET_ID,
-        range = f"{SHEET_NAME}!A:D",
+        range = f'{SHEET_NAME}!A:E',
         body = dict(values = row),
-        valueInputOption = "USER_ENTERED",
+        valueInputOption = 'USER_ENTERED',
     ).execute()
-
-# # Perform SQL query on the Google Sheet.
-@st.cache(ttl = 20)
-def run_query(query):
-    rows = conn.execute(query, headers = 1)
-    rows = rows.fetchall()
-    return rows
 
 
 
@@ -89,10 +78,8 @@ st.title('🥰 마이 페이지')
 ''
 if st.session_state['sign_in']:
     st.subheader(f'환영합니다, {st.session_state["sign_in"][1]}님.')
-    '계정 정보:'
-    st.session_state['sign_in']
-    ''
-    '통계 즐겨찾기 기능은 현재 **준비 중**입니다. 이용에 불편을 드려 죄송합니다.'
+    
+    '통계 즐겨찾기 기능은 현재 **준비 중**입니다.'
     ''
     if st.button('로그아웃'):
         st.session_state['sign_in'] = []
@@ -109,14 +96,13 @@ else:
                 # 로그인 시작
                 try:
                     gsheet_connector = connect_to_gsheet()
-                    conn = connect(credentials = credentials)
-                    sheet_url = GSHEET_URL
-                    rows = run_query(f'SELECT * FROM "{sheet_url}"')
+                    rows = list(get_data(gsheet_connector).itertuples())
                 except:
                     st.warning('이런! 무언가 문제가 있었습니다. 잠시 후 다시 시도해 주세요.')
                 finally:
                     for row in rows:
                         if row[1] == login_id:
+                            st.write(login_id)
                             if row[2] == login_pw:
                                 st.session_state['sign_in'] = row
                                 st.experimental_rerun()
@@ -151,9 +137,7 @@ else:
                 else:
                     try:
                         gsheet_connector = connect_to_gsheet()
-                        conn = connect(credentials = credentials)
-                        sheet_url = GSHEET_URL
-                        rows = run_query(f'SELECT * FROM "{sheet_url}"')
+                        rows = list(get_data(gsheet_connector).itertuples())
                         for row in rows:
                             if row[1] == sign_up_id:
                                 st.warning('동일한 아이디가 이미 등록되어 있습니다. 다른 아이디를 사용해주세요.')
@@ -161,7 +145,7 @@ else:
                         else:
                             add_row_to_gsheet(
                                 gsheet_connector,
-                                [[0, sign_up_id, sign_up_pw, sign_up_email]],
+                                [[sign_up_id, sign_up_pw, sign_up_email]],
                             )
                             st.success("회원가입이 완료되었습니다.")
                             st.balloons()

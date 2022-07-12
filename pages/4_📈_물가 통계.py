@@ -1,20 +1,27 @@
 import streamlit as st
 import pandas as pd
+import os
 
 st.set_page_config(page_title = '물가 통계 - 통계 간편 조회 서비스', page_icon = '📈')
 
 if 'recommendation_money' not in st.session_state:
     st.session_state['recommendation_money'] = []
+if 'sign_in' not in st.session_state:
+    st.session_state['sign_in'] = []
+
+
 
 st.title('📈 물가 통계')
 st.markdown('국가통계포털([kosis.kr](https://kosis.kr))의 인구 통계를 선택적으로 제공합니다.  \n국가통계포털에서 실시간으로 데이터를 가져오는 서비스가 **아닙니다**.  \n원하는 통계가 있거나 업데이트가 필요하다면, 왼쪽 사이드바의 😎 **정보**에 의견을 남겨주세요.')
 ''
 ''
 ''
-data_list = sorted(['소비자물가지수', '국내총생산(명목)', '국민총소득(명목)', '요소비용국민소득(명목)',
-    '국민처분가능소득(명목)', '국민총처분가능소득(명목)', '가계총처분가능소득(명목)',
-    '1인당 국내총생산(명목)', '1인당 국민총소득(명목)', '1인당 가계총처분가능소득(명목)',
-    '국내총생산(실질성장률)'])
+os.chdir('data/물가 통계')
+raw_list = sorted(os.listdir())
+os.chdir('../../')
+data_list = []
+for i in raw_list:
+    data_list.append(i[:-4])
 selection = st.multiselect('조회할 데이터를 선택하세요.', data_list,
     default = st.session_state['recommendation_money'])
 
