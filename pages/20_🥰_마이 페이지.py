@@ -88,8 +88,8 @@ else:
     # 로그인 폼
     st.subheader('로그인')
     with st.form('login', True):
-        login_id = st.text_input('아이디')
-        login_pw = st.text_input('비밀번호', type = 'password')
+        login_id = st.text_input('아이디', autocomplete = 'username')
+        login_pw = st.text_input('비밀번호', type = 'password', autocomplete = 'password')
         if st.form_submit_button('로그인'):
             if login_id and login_pw:
                 # 로그인 시작
