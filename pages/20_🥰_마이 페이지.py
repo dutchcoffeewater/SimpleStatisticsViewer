@@ -94,9 +94,10 @@ else:
             if login_id and login_pw:
                 # 로그인 시작
                 try:
+                    'start debugging..'
                     gsheet_connector = connect_to_gsheet()
-                    rows = list(get_data(gsheet_connector).itertuples())
                     st.write(get_data(gsheet_connector))
+                    rows = list(get_data(gsheet_connector).itertuples())
                 except:
                     st.warning('이런! 무언가 문제가 있었습니다. 잠시 후 다시 시도해 주세요.')
                 else:
