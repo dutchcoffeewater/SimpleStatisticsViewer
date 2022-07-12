@@ -96,6 +96,7 @@ else:
                 try:
                     'start debugging..'
                     gsheet_connector = connect_to_gsheet()
+                    '1st complete.'
                     st.write(get_data(gsheet_connector))
                     rows = list(get_data(gsheet_connector).itertuples())
                 except:
