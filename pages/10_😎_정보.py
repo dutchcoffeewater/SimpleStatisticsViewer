@@ -36,7 +36,7 @@ with st.form('Requests',True):
                 smtp_naver.login(st.secrets['request_sender'], st.secrets['request_sender_pw'])
                 send_request = EmailMessage()
                 if email:
-                    request_email = st.session_state['sign_in'][3]
+                    request_email = st.session_state['sign_in'][2]
                 if request_email:
                     send_request['Subject'] = request_email+'의 새로운 요청'
                 else:

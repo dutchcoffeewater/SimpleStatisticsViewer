@@ -84,7 +84,7 @@ st.title('🥰 마이 페이지')
 ''
 ''
 if st.session_state['sign_in']:
-    st.subheader(f'환영합니다, {st.session_state["sign_in"][1]}님.')
+    st.subheader(f'환영합니다, {st.session_state["sign_in"][0]}님.')
     
     '통계 즐겨찾기 기능은 현재 **준비 중**입니다.'
     ''
