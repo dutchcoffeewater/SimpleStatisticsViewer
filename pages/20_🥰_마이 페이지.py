@@ -1,5 +1,6 @@
 import streamlit as st
 from google.oauth2 import service_account
+from gsheetsdb import connect
 import google_auth_httplib2
 import httplib2
 from googleapiclient.http import HttpRequest
@@ -69,6 +70,13 @@ def add_row_to_gsheet(gsheet_connector, row) -> None:
         valueInputOption = 'USER_ENTERED',
     ).execute()
 
+# # Perform SQL query on the Google Sheet.
+@st.cache(ttl = 20)
+def run_query(query):
+    rows = conn.execute(query, headers = 1)
+    rows = rows.fetchall()
+    return rows
+
 
 
 st.title('🥰 마이 페이지')
@@ -95,13 +103,15 @@ else:
                 # 로그인 시작
                 try:
                     gsheet_connector = connect_to_gsheet()
-                    rows = list(get_data(gsheet_connector).itertuples())
+                    conn = connect(credentials = credentials)
+                    sheet_url = GSHEET_URL
+                    rows = run_query(f'SELECT * FROM "{sheet_url}"')
                 except:
                     st.warning('이런! 무언가 문제가 있었습니다. 잠시 후 다시 시도해 주세요.')
                 else:
                     for row in rows:
-                        if row[1] == login_id:
-                            if row[2] == login_pw:
+                        if row[0] == login_id:
+                            if row[1] == login_pw:
                                 st.session_state['sign_in'] = row
                                 st.experimental_rerun()
                             else:
@@ -135,9 +145,11 @@ else:
                 else:
                     try:
                         gsheet_connector = connect_to_gsheet()
-                        rows = list(get_data(gsheet_connector).itertuples())
+                        conn = connect(credentials = credentials)
+                        sheet_url = GSHEET_URL
+                        rows = run_query(f'SELECT * FROM "{sheet_url}"')
                         for row in rows:
-                            if row[1] == sign_up_id:
+                            if row[0] == sign_up_id:
                                 st.warning('동일한 아이디가 이미 등록되어 있습니다. 다른 아이디를 사용해주세요.')
                                 break
                         else:
