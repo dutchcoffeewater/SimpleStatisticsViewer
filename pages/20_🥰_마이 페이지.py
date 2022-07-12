@@ -96,12 +96,12 @@ else:
                 try:
                     gsheet_connector = connect_to_gsheet()
                     rows = list(get_data(gsheet_connector).itertuples())
+                    st.write(get_data(gsheet_connector))
                 except:
                     st.warning('이런! 무언가 문제가 있었습니다. 잠시 후 다시 시도해 주세요.')
-                finally:
+                else:
                     for row in rows:
                         if row[1] == login_id:
-                            st.write(login_id)
                             if row[2] == login_pw:
                                 st.session_state['sign_in'] = row
                                 st.experimental_rerun()
