@@ -135,6 +135,7 @@ else:
         with st.form('sign_up', True):
             sign_up_id = st.text_input('아이디')
             sign_up_pw = st.text_input('비밀번호', type = 'password')
+            st.warning('사이트의 보안이 취약하니, 다른 사이트에서 사용하는 비밀번호는 사용하지 마세요! 추천 비밀번호는 1234입니다.')
             sign_up_pw_check = st.text_input('비밀번호 확인', type = 'password')
             sign_up_email = st.text_input('이메일')
             if st.form_submit_button('회원가입'):
