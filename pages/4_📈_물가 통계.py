@@ -4,10 +4,43 @@ import os
 
 st.set_page_config(page_title = '물가 통계 - 통계 간편 조회 서비스', page_icon = '📈')
 
+
+
+# session_state 동기화
 if 'recommendation_money' not in st.session_state:
     st.session_state['recommendation_money'] = []
 if 'sign_in' not in st.session_state:
     st.session_state['sign_in'] = []
+
+
+
+# 공통 요소
+def sort_by_unit(dataset: pd.DataFrame, check: bool = False):
+    a = {}
+    for i in dataset.columns:
+        new = i[-(i[::-1].index('(')):-1]
+        if new in a:
+            a[new].append(i[:-(i[::-1].index('('))-2])
+        else:
+            a[new] = [i[:-(i[::-1].index('('))-2]]
+    unit_sorted = sorted(a)
+    new_line = ''
+    for i in unit_sorted:
+        new_line += '- ' + str(i) + ': '
+        for j in a[i]:
+            new_line += j + ', '
+        new_line = new_line[:-2] + '  \n'
+    if check:
+        if new_line.count('\n') > 1:
+            st.warning('표시된 자료의 단위가 다릅니다! 자세한 내용은 아래 도움말을 참고하세요.')
+    else:
+        st.subheader('단위 안내')
+        st.markdown(new_line)
+
+def disclaimer():
+    with st.expander('Disclaimer'):
+        with open('data/Disclaimer.txt', 'r', encoding = 'utf8') as f:
+            st.caption(f.read())
 
 
 
@@ -48,6 +81,8 @@ if selection:
     elif chart_selection == '바 차트':
         st.bar_chart(dataset)
 
+    sort_by_unit(dataset, True)
+
     if '소비자물가지수' in selection:
         if '소비자물가지수' in st.session_state['recommendation_money']:
                 st.success('아래의 가격 계산기도 확인해보세요.')
@@ -69,7 +104,13 @@ if selection:
                     st.metric(f'{max(min(year),1965)}년의 가격은',
                         str(round((float(dataset.loc[[max(min(year),1965)], ['소비자물가지수 (2020년 = 100)']].values)*comparison_2)/float(dataset.loc[[max(max(year),1965)], ['소비자물가지수 (2020년 = 100)']].values),2))+'원')
 
+    with st.expander('도움말'):
+        sort_by_unit(dataset)
+    ''
+    ''
+    '데이터 시트'
     st.write(dataset)
+    disclaimer()
     st.download_button(label = '📄 데이터 다운로드', data = dataset.to_csv().encode('CP949'),
         file_name = 'data.csv', mime = 'text/csv',
         help = 'CSV 파일을 다운로드합니다. 그게 뭐냐고요? 걱정하지 마세요! 엑셀에서 열 수 있습니다.')

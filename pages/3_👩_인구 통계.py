@@ -4,12 +4,45 @@ import os
 
 st.set_page_config(page_title = '인구 통계 - 통계 간편 조회 서비스', page_icon = '👩')
 
+
+
+# session_state 동기화
 if 'recommendation_population' not in st.session_state:
     st.session_state['recommendation_population'] = []
 if 'original_chart' not in st.session_state:
     st.session_state['original_chart'] = False
 if 'sign_in' not in st.session_state:
     st.session_state['sign_in'] = []
+
+
+
+# 공통 요소
+def sort_by_unit(dataset: pd.DataFrame, check: bool = False):
+    a = {}
+    for i in dataset.columns:
+        new = i[-(i[::-1].index('(')):-1]
+        if new in a:
+            a[new].append(i[:-(i[::-1].index('('))-2])
+        else:
+            a[new] = [i[:-(i[::-1].index('('))-2]]
+    unit_sorted = sorted(a)
+    new_line = ''
+    for i in unit_sorted:
+        new_line += '- ' + str(i) + ': '
+        for j in a[i]:
+            new_line += j + ', '
+        new_line = new_line[:-2] + '  \n'
+    if check:
+        if new_line.count('\n') > 1:
+            st.warning('표시된 자료의 단위가 다릅니다! 자세한 내용은 아래 도움말을 참고하세요.')
+    else:
+        st.subheader('단위 안내')
+        st.markdown(new_line)
+
+def disclaimer():
+    with st.expander('Disclaimer'):
+        with open('data/Disclaimer.txt', 'r', encoding = 'utf8') as f:
+            st.caption(f.read())
 
 
 
@@ -62,6 +95,8 @@ if selection:
                 st.warning('인구 범주의 경우 2015년부터 매년 통계를 내기 때문에 이를 전후로 X축 스케일이 다릅니다. 해석에 주의해주세요.')
             st.bar_chart(dataset2)
         
+        sort_by_unit(dataset2, True)
+
         st.warning('현재 표시되는 그래프와 데이터는 축약된 형태입니다!')
         with st.expander('도움말'):
             '그래프를 정상적으로 표시하기 위해 데이터를 축약하였습니다.'
@@ -69,12 +104,21 @@ if selection:
             if st.button('전체 데이터 사용하기'):
                 st.session_state['original_chart'] = True
                 st.experimental_rerun()
+            ''
+            
+            sort_by_unit(dataset2)
+
+            if '취업자' in classification:
+                st.warning('취업자 범주의 자료는 국가통계포털의 단위가 "천 명"이나, 그래프에 정상적으로 표시하기 위해 임의로 1000을 곱하여 단위를 "명"으로 맞추었습니다. 원본과 동일하게 자료를 취급하고자 하신다면 취업자 범주의 자료는 1000으로 나누어서 사용하시기 바랍니다.')
+
             if '취업자 - 비임금근로자' in selection:
+                ''
                 st.warning('비임금근로자는 자영업자와 무급가족종사자의 합입니다.')
         ''
         ''
         '데이터 시트'
-        dataset2
+        st.write(dataset2)
+        disclaimer()
         st.download_button(label = '📄 데이터 다운로드', data = dataset2.to_csv().encode('CP949'),
         file_name = 'data.csv', mime = 'text/csv',
         help = 'CSV 파일을 다운로드합니다. 그게 뭐냐고요? 걱정하지 마세요! 엑셀에서 열 수 있습니다.')
@@ -105,6 +149,8 @@ if selection:
                 st.warning('인구 범주의 경우 2015년부터 매년 통계를 내기 때문에 이를 전후로 X축 스케일이 다릅니다. 해석에 주의해주세요.')
             st.bar_chart(dataset)
         
+        sort_by_unit(dataset, True)
+        
         if '인구 ' in classification and '취업자' in classification:
             with st.expander('그래프가 제대로 표시되지 않나요?'):
                 st.write('인구 범주는 5년 단위로 작성된 반면 취업자 범주는 1년 단위로 작성되었기 때문에, '
@@ -113,15 +159,20 @@ if selection:
                 if st.button('축약된 형태로 로드하기'):
                     st.session_state['original_chart'] = False
                     st.experimental_rerun()
-
-        if '취업자 - 비임금근로자' in selection:
-            with st.expander('도움말'):
+        
+        with st.expander('도움말'):
+            sort_by_unit(dataset)
+            if '취업자' in classification:
+                st.warning('취업자 범주의 자료는 국가통계포털의 단위가 "천 명"이나, 그래프에 정상적으로 표시하기 위해 임의로 1000을 곱하여 단위를 "명"으로 맞추었습니다. 원본과 동일하게 자료를 취급하고자 하신다면 취업자 범주의 자료는 1000으로 나누어서 사용하시기 바랍니다.')
+            if '취업자 - 비임금근로자' in selection:
+                ''
                 st.warning('비임금근로자는 자영업자와 무급가족종사자의 합입니다.')
         
         ''
         ''
         '데이터 시트'
-        dataset
+        st.write(dataset)
+        disclaimer()
         st.download_button(label = '📄 데이터 다운로드', data = dataset.to_csv().encode('CP949'),
-        file_name = 'data.csv', mime = 'text/csv',
-        help = 'CSV 파일을 다운로드합니다. 그게 뭐냐고요? 걱정하지 마세요! 엑셀에서 열 수 있습니다.')
+            file_name = 'data.csv', mime = 'text/csv',
+            help = 'CSV 파일을 다운로드합니다. 그게 뭐냐고요? 걱정하지 마세요! 엑셀에서 열 수 있습니다.')
